@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum as SQLEnum, Text
 from sqlalchemy.sql import func
 from db import Base
 import enum
@@ -33,7 +33,7 @@ class MRUser(Base):
     upi_id = Column(String(100), nullable=True)
     date_of_birth = Column(DateTime, nullable=True)
     gender = Column(SQLEnum(GenderType), nullable=True)
-    profile_photo_url = Column(String(500), nullable=True)
+    profile_photo = Column(Text, nullable=True)  # Base64 encoded image
     alternative_phone_no = Column(String(15), nullable=True)
     designation = Column(SQLEnum(DesignationType), nullable=True)
     is_verified = Column(Boolean, default=False)

@@ -52,7 +52,7 @@ class MRUserResponse(BaseModel):
     upi_id: Optional[str] = None
     date_of_birth: Optional[datetime] = None
     gender: Optional[GenderEnum] = None
-    profile_photo_url: Optional[str] = None
+    profile_photo: Optional[str] = None  # Base64 encoded image
     alternative_phone_no: Optional[str] = None
     designation: Optional[DesignationEnum] = None
     is_verified: bool
@@ -122,8 +122,8 @@ class UpdateGender(BaseModel):
     gender: GenderEnum
 
 
-class UpdateProfilePhotoUrl(BaseModel):
-    profile_photo_url: str
+class UpdateProfilePhoto(BaseModel):
+    profile_photo: str  # Base64 encoded image
 
 
 class UpdateAlternativePhoneNo(BaseModel):
@@ -152,7 +152,7 @@ class UpdateAllFields(BaseModel):
     upi_id: Optional[str] = None
     date_of_birth: Optional[datetime] = None
     gender: Optional[GenderEnum] = None
-    profile_photo_url: Optional[str] = None
+    profile_photo: Optional[str] = None  # Base64 encoded image
     alternative_phone_no: Optional[str] = None
     designation: Optional[DesignationEnum] = None
     is_verified: Optional[bool] = None
@@ -407,13 +407,13 @@ def update_gender(user_id: int, data: UpdateGender, db: Session = Depends(get_db
     return user
 
 
-@router.put("/{user_id}/profile-photo-url", response_model=MRUserResponse)
-def update_profile_photo_url(user_id: int, data: UpdateProfilePhotoUrl, db: Session = Depends(get_db)):
-    """Update user's profile photo URL"""
+@router.put("/{user_id}/profile-photo", response_model=MRUserResponse)
+def update_profile_photo(user_id: int, data: UpdateProfilePhoto, db: Session = Depends(get_db)):
+    """Update user's profile photo (Base64 encoded)"""
     user = db.query(MRUser).filter(MRUser.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    user.profile_photo_url = data.profile_photo_url
+    user.profile_photo = data.profile_photo
     db.commit()
     db.refresh(user)
     return user
