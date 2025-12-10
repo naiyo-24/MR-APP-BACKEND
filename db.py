@@ -32,4 +32,5 @@ def get_db():
 def create_tables():
     """Create all tables in the database"""
     from models.auth.mr_users_models import MRUser
+    from models.attendance.attendance_models import Attendance
     Base.metadata.create_all(bind=engine)
