@@ -37,4 +37,5 @@ def create_tables():
     from models.appointment.appointment_models import Appointment
     from models.headquarter.headquarter_models import Headquarter
     from models.headquarter.assignment_models import Assignment
+    from models.visual_ads.visual_ads_models import VisualAd
     Base.metadata.create_all(bind=engine)
