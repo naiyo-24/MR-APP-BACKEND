@@ -13,6 +13,7 @@ from routes.appointment.appointment_routes import router as appointment_router
 from routes.headquarter.headquarter_routes import router as headquarter_router
 from routes.headquarter.assignment_routes import router as assignment_router
 from routes.visual_ads.visual_ads_routes import router as visual_ads_router
+from routes.salary_slip.slip_routes import router as salary_slip_router
 
 # Configure logging
 logging.basicConfig(
@@ -74,6 +75,7 @@ async def log_requests(request: Request, call_next):
 
 
 
+
 app.include_router(mr_users_router)
 app.include_router(attendance_router)
 app.include_router(doctor_router)
@@ -82,6 +84,7 @@ app.include_router(appointment_router)
 app.include_router(headquarter_router)
 app.include_router(assignment_router)
 app.include_router(visual_ads_router)
+app.include_router(salary_slip_router)
 
 
 @app.get("/")

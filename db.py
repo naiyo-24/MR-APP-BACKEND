@@ -38,4 +38,5 @@ def create_tables():
     from models.headquarter.headquarter_models import Headquarter
     from models.headquarter.assignment_models import Assignment
     from models.visual_ads.visual_ads_models import VisualAd
+    from models.salary_slip.slip_models import SalarySlip
     Base.metadata.create_all(bind=engine)
