@@ -35,4 +35,6 @@ def create_tables():
     from models.attendance.attendance_models import Attendance
     from models.doctor.doctor_models import Doctor, Chamber
     from models.appointment.appointment_models import Appointment
+    from models.headquarter.headquarter_models import Headquarter
+    from models.headquarter.assignment_models import Assignment
     Base.metadata.create_all(bind=engine)
