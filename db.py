@@ -33,4 +33,6 @@ def create_tables():
     """Create all tables in the database"""
     from models.auth.mr_users_models import MRUser
     from models.attendance.attendance_models import Attendance
+    from models.doctor.doctor_models import Doctor, Chamber
+    from models.appointment.appointment_models import Appointment
     Base.metadata.create_all(bind=engine)
