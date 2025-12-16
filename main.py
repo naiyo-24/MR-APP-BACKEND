@@ -6,6 +6,7 @@ import time
 
 from db import create_tables
 from routes.auth.mr_users_routes import router as mr_users_router
+from routes.auth.admin_users_routes import router as admin_users_router
 from routes.attendance.attendance_routes import router as attendance_router
 from routes.doctor.doctor_routes import router as doctor_router
 from routes.doctor.chamber_routes import router as chamber_router
@@ -77,6 +78,7 @@ async def log_requests(request: Request, call_next):
 
 
 app.include_router(mr_users_router)
+app.include_router(admin_users_router)
 app.include_router(attendance_router)
 app.include_router(doctor_router)
 app.include_router(chamber_router)
