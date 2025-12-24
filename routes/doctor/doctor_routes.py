@@ -34,6 +34,7 @@ class DoctorCreate(BaseModel):
 class DoctorResponse(BaseModel):
     doctor_id: int
     mr_user_id: int
+    mr_user_full_name: Optional[str] = None
     doctor_name: str
     phone_no: Optional[str] = None
     email: Optional[str] = None
@@ -99,11 +100,15 @@ def create_doctor(mr_user_id: int, doctor_data: DoctorCreate, db: Session = Depe
 @router.get("/mr-user/{mr_user_id}", response_model=List[DoctorResponse])
 def get_doctors_by_mr_user(mr_user_id: int, db: Session = Depends(get_db)):
     """Get all doctors added by MR user ID"""
+    # Fetch MR user once (all doctors here belong to this MR user)
+    user = db.query(MRUser).filter(MRUser.id == mr_user_id).first()
+    full_name = user.full_name if user else None
+
     doctors = db.query(Doctor).filter(Doctor.mr_user_id == mr_user_id).all()
     responses = []
     for doctor in doctors:
         chambers = db.query(Chamber).filter(Chamber.doctor_id == doctor.doctor_id).all()
-        responses.append(DoctorResponse(**doctor.__dict__, chambers=chambers))
+        responses.append(DoctorResponse(**doctor.__dict__, chambers=chambers, mr_user_full_name=full_name))
     return responses
 
 @router.get("/", response_model=List[DoctorResponse])
@@ -113,7 +118,10 @@ def get_all_doctors(db: Session = Depends(get_db)):
     responses = []
     for doctor in doctors:
         chambers = db.query(Chamber).filter(Chamber.doctor_id == doctor.doctor_id).all()
-        responses.append(DoctorResponse(**doctor.__dict__, chambers=chambers))
+        # Fetch MR user full name for each doctor
+        user = db.query(MRUser).filter(MRUser.id == doctor.mr_user_id).first()
+        full_name = user.full_name if user else None
+        responses.append(DoctorResponse(**doctor.__dict__, chambers=chambers, mr_user_full_name=full_name))
     return responses
 
 # ==================== PUT ROUTES ====================
