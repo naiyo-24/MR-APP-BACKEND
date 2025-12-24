@@ -1,12 +1,12 @@
 
 from fastapi import APIRouter
 from fastapi.responses import FileResponse, JSONResponse
-import os
+from pathlib import Path
 
 router = APIRouter(prefix="/api/force-update", tags=["Force Update"])
 
-latest_apk_version = "1.0.8"
-latest_apk_file = "app_ver_108.apk"
+latest_apk_version = "1.0.1"
+latest_apk_file = "mr_app_101.apk"
 
 
 # GET /api/force-update - Return the latest APK file info (URL, version, filename)
@@ -23,19 +23,19 @@ def get_force_update():
 # GET /api/force-update/download-apk/{filename} - Serve a specific APK file from the apk-builds directory
 @router.get('/download-apk/{filename}')
 def download_apk(filename: str):
-    apk_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apk-builds')
-    file_path = os.path.join(apk_dir, filename)
-    if not os.path.isfile(file_path):
+    apk_dir = Path(__file__).resolve().parents[2] / 'apk-builds'
+    file_path = apk_dir / filename
+    if not file_path.is_file():
         return JSONResponse({"error": "File not found"}, status_code=404)
-    return FileResponse(path=file_path, filename=filename, media_type='application/vnd.android.package-archive')
+    return FileResponse(path=str(file_path), filename=filename, media_type='application/vnd.android.package-archive')
 
 
 # GET /api/force-update/download-apk - Download the latest APK file as an attachment
 @router.get('/download-apk')
 def download_apk_latest():
     filename = latest_apk_file
-    apk_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apk-builds')
-    file_path = os.path.join(apk_dir, filename)
-    if not os.path.isfile(file_path):
+    apk_dir = Path(__file__).resolve().parents[2] / 'apk-builds'
+    file_path = apk_dir / filename
+    if not file_path.is_file():
         return JSONResponse({"error": "File not found"}, status_code=404)
-    return FileResponse(path=file_path, filename=filename, media_type='application/vnd.android.package-archive')
+    return FileResponse(path=str(file_path), filename=filename, media_type='application/vnd.android.package-archive')

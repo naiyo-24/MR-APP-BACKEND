@@ -1,6 +1,8 @@
 # Environment variables
 .env
 
+# apk-builds
+apk-builds/
 # Python cache
 __pycache__/
 *.py[cod]
