@@ -40,10 +40,10 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      HOST: 0.0.0.0
-      PORT: 2000
-      DEBUG: "True"
+    # environment:
+    #   HOST: 0.0.0.0
+    #   PORT: 2000
+    #   DEBUG: "True"
     ports:
       - "2000:2000"
     depends_on:
@@ -54,18 +54,18 @@ services:
     # volumes:
     #   - uploads_data:/app/uploads
 
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    # command: [ "sh", "-c", "alembic upgrade head" ]
-    depends_on:
-      - db
-    networks:
-      - medorica_mr_backend_net
-    restart: "no"
+  # migrate:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   # command: [ "sh", "-c", "alembic upgrade head" ]
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - medorica_mr_backend_net
+  #   restart: "no"
 
 volumes:
   db_data:
