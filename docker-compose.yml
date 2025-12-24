@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - medorica_mr_backend_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env
+    environment:
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      PGADMIN_CONFIG_WTF_CSRF_ENABLED: "False"
+      PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT: "False"
+      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: "1"
+      PGADMIN_CONFIG_PROXY_X_FOR_COUNT: "1"
+      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: "1"
+    ports:
+      - "2001:80"
+    depends_on:
+      - db
+    networks:
+      - medorica_mr_backend_net
+
+  backend:
+    build:
+      context: .
+      dockerfile: DockerFile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 2000
+      DEBUG: "True"
+    ports:
+      - "2000:2000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - medorica_mr_backend_net
+    # volumes:
+    #   - uploads_data:/app/uploads
+
+  migrate:
+    build:
+      context: .
+      dockerfile: DockerFile
+    env_file:
+      - .env
+    # command: [ "sh", "-c", "alembic upgrade head" ]
+    depends_on:
+      - db
+    networks:
+      - medorica_mr_backend_net
+    restart: "no"
+
+volumes:
+  db_data:
+  # uploads_data:
+
+
+networks:
+  medorica_mr_backend_net:
+    driver: bridge
