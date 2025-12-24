@@ -15,6 +15,7 @@ from routes.headquarter.headquarter_routes import router as headquarter_router
 from routes.headquarter.assignment_routes import router as assignment_router
 from routes.visual_ads.visual_ads_routes import router as visual_ads_router
 from routes.salary_slip.slip_routes import router as salary_slip_router
+from routes.ads.ads_routes import router as ads_router
 
 # Configure logging
 logging.basicConfig(
@@ -87,6 +88,7 @@ app.include_router(headquarter_router)
 app.include_router(assignment_router)
 app.include_router(visual_ads_router)
 app.include_router(salary_slip_router)
+app.include_router(ads_router)
 
 
 @app.get("/")
