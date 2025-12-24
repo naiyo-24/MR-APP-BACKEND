@@ -95,13 +95,26 @@ class ChamberInfo(BaseModel):
 	class Config:
 		from_attributes = True
 
+class MRUserInfo(BaseModel):
+	id: int
+	full_name: str
+
+	class Config:
+		from_attributes = True
+
+
 class AppointmentFullResponse(AppointmentResponse):
+	mr_user_full_name: str
 	doctor: DoctorInfo
 	chamber: ChamberInfo
 
 # GET: Get appointments by MR user ID (with doctor and chamber details)
 @router.get("/mr-user/{mr_user_id}", response_model=List[AppointmentFullResponse])
 def get_appointments_by_mr_user(mr_user_id: int, db: Session = Depends(get_db)):
+	user = db.query(MRUser).filter(MRUser.id == mr_user_id).first()
+	if not user:
+		raise HTTPException(status_code=404, detail="MR User not found")
+
 	appointments = db.query(Appointment).filter(Appointment.mr_user_id == mr_user_id).all()
 	results = []
 	for appt in appointments:
@@ -111,6 +124,7 @@ def get_appointments_by_mr_user(mr_user_id: int, db: Session = Depends(get_db)):
 		chamber_info = ChamberInfo(**chamber.__dict__) if chamber else None
 		results.append(AppointmentFullResponse(
 			**appt.__dict__,
+			mr_user_full_name=user.full_name,
 			doctor=doctor_info,
 			chamber=chamber_info
 		))
