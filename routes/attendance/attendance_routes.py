@@ -66,6 +66,7 @@ class UpdateAttendance(BaseModel):
 
 # ==================== POST ROUTES ====================
 
+# POST: Create a new attendance record for an MR user
 @router.post("/", response_model=AttendanceResponse, status_code=status.HTTP_201_CREATED)
 def create_attendance(attendance_data: AttendanceCreate, db: Session = Depends(get_db)):
     """Create a new attendance record"""
@@ -108,6 +109,7 @@ def create_attendance(attendance_data: AttendanceCreate, db: Session = Depends(g
 
 # ==================== GET ROUTES ====================
 
+# GET: Retrieve all attendance records
 @router.get("/", response_model=List[AttendanceResponse])
 def get_all_attendance(db: Session = Depends(get_db)):
     """Get all attendance records"""
@@ -115,6 +117,7 @@ def get_all_attendance(db: Session = Depends(get_db)):
     return attendance_records
 
 
+# GET: Retrieve a single attendance record by its ID
 @router.get("/{attendance_id}", response_model=AttendanceResponse)
 def get_attendance_by_id(attendance_id: int, db: Session = Depends(get_db)):
     """Get attendance record by attendance ID"""
@@ -127,6 +130,7 @@ def get_attendance_by_id(attendance_id: int, db: Session = Depends(get_db)):
     return attendance
 
 
+# GET: Retrieve all attendance records for a specific MR user
 @router.get("/user/{user_id}", response_model=List[AttendanceResponse])
 def get_attendance_by_user_id(user_id: int, db: Session = Depends(get_db)):
     """Get all attendance records for a specific MR User"""
@@ -142,6 +146,7 @@ def get_attendance_by_user_id(user_id: int, db: Session = Depends(get_db)):
     return attendance_records
 
 
+# GET: Retrieve attendance for a specific MR user on a specific date
 @router.get("/user/{user_id}/date/{date}", response_model=AttendanceResponse)
 def get_attendance_by_user_and_date(user_id: int, date: date, db: Session = Depends(get_db)):
     """Get attendance record for a specific user on a specific date"""
@@ -160,6 +165,7 @@ def get_attendance_by_user_and_date(user_id: int, date: date, db: Session = Depe
 
 # ==================== PUT ROUTES ====================
 
+# PUT: Update check-in time for an attendance record
 @router.put("/{attendance_id}/check-in-time", response_model=AttendanceResponse)
 def update_check_in_time(attendance_id: int, data: UpdateCheckInTime, db: Session = Depends(get_db)):
     """Update check-in time"""
@@ -172,6 +178,7 @@ def update_check_in_time(attendance_id: int, data: UpdateCheckInTime, db: Sessio
     return attendance
 
 
+# PUT: Update check-out time for an attendance record
 @router.put("/{attendance_id}/check-out-time", response_model=AttendanceResponse)
 def update_check_out_time(attendance_id: int, data: UpdateCheckOutTime, db: Session = Depends(get_db)):
     """Update check-out time"""
@@ -184,6 +191,7 @@ def update_check_out_time(attendance_id: int, data: UpdateCheckOutTime, db: Sess
     return attendance
 
 
+# PUT: Update selfie proof (Base64) for an attendance record
 @router.put("/{attendance_id}/selfie-proof", response_model=AttendanceResponse)
 def update_selfie_proof(attendance_id: int, data: UpdateSelfieProof, db: Session = Depends(get_db)):
     """Update selfie proof (Base64 encoded image)"""
@@ -196,6 +204,7 @@ def update_selfie_proof(attendance_id: int, data: UpdateSelfieProof, db: Session
     return attendance
 
 
+# PUT: Update present/absent status for an attendance record by ID
 @router.put("/{attendance_id}/present", response_model=AttendanceResponse)
 def update_present_status(attendance_id: int, data: UpdatePresent, db: Session = Depends(get_db)):
     """Update present status"""
@@ -208,6 +217,34 @@ def update_present_status(attendance_id: int, data: UpdatePresent, db: Session =
     return attendance
 
 
+# PUT (admin): Set present/absent for an MR user on a specific date (creates if missing)
+@router.put("/admin/user/{user_id}/date/{date}/present", response_model=AttendanceResponse)
+def admin_update_present_by_user_and_date(user_id: int, date: date, data: UpdatePresent, db: Session = Depends(get_db)):
+    """Admin: set present/absent for a MR user on a specific date. Creates record if missing."""
+    # Verify user exists
+    user = db.query(MRUser).filter(MRUser.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="MR User not found")
+
+    attendance = db.query(Attendance).filter(Attendance.id == user_id, Attendance.date == date).first()
+    if attendance:
+        attendance.present = data.present
+        attendance.name = user.full_name
+    else:
+        attendance = Attendance(
+            id=user_id,
+            name=user.full_name,
+            date=date,
+            present=data.present
+        )
+        db.add(attendance)
+
+    db.commit()
+    db.refresh(attendance)
+    return attendance
+
+
+# PUT: Update multiple fields of an attendance record
 @router.put("/{attendance_id}", response_model=AttendanceResponse)
 def update_attendance(attendance_id: int, data: UpdateAttendance, db: Session = Depends(get_db)):
     """Update multiple attendance fields at once"""
@@ -238,6 +275,7 @@ class MonthlyAttendanceSummary(BaseModel):
     attendance_percentage: float
 
 
+# GET: Monthly attendance summary (present/absent counts and percentage) for a user
 @router.get("/summary/user/{user_id}/month/{year}/{month}", response_model=MonthlyAttendanceSummary)
 def get_monthly_attendance_summary(user_id: int, year: int, month: int, db: Session = Depends(get_db)):
     """Get attendance summary (present/absent days count) for a user in a specific month"""
