@@ -33,6 +33,21 @@ services:
     networks:
       - medorica_mr_backend_net
 
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    command: alembic upgrade head
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - medorica_mr_backend_net
+    restart: "no"
+
   backend:
     build:
       context: .
@@ -40,19 +55,13 @@ services:
     restart: always
     env_file:
       - .env
-    # environment:
-    #   HOST: 0.0.0.0
-    #   PORT: 2000
-    #   DEBUG: "True"
     ports:
       - "2000:2000"
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - medorica_mr_backend_net
-    # volumes:
-    #   - uploads_data:/app/uploads
 
   # migrate:
   #   build:
