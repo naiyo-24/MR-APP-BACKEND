@@ -47,6 +47,7 @@ class UpdateCheckInTime(BaseModel):
 
 class UpdateCheckOutTime(BaseModel):
     check_out_time: datetime
+    check_out_selfie: Optional[str] = None  # Base64 encoded image
 
 
 class UpdateSelfieProof(BaseModel):
@@ -186,11 +187,13 @@ def update_check_in_time(attendance_id: int, data: UpdateCheckInTime, db: Sessio
 # PUT: Update check-out time for an attendance record
 @router.put("/{attendance_id}/check-out-time", response_model=AttendanceResponse)
 def update_check_out_time(attendance_id: int, data: UpdateCheckOutTime, db: Session = Depends(get_db)):
-    """Update check-out time"""
+    """Update check-out time and optionally upload check-out selfie"""
     attendance = db.query(Attendance).filter(Attendance.attendance_id == attendance_id).first()
     if not attendance:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attendance record not found")
     attendance.check_out_time = data.check_out_time
+    if data.check_out_selfie is not None:
+        attendance.check_out_selfie = data.check_out_selfie
     db.commit()
     db.refresh(attendance)
     return attendance
