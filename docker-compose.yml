@@ -40,7 +40,8 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
-    command: alembic upgrade head
+    # Override the image ENTRYPOINT so this service only runs migrations and exits
+    entrypoint: ["sh", "-c", "alembic upgrade head"]
     depends_on:
       db:
         condition: service_healthy
