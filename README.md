@@ -123,7 +123,7 @@ Note: all routes are prefixed as shown in each router. Use `/docs` for interacti
 Tables and main fields (SQLAlchemy models)
 - `mr_users` (`MRUser`): id, full_name, phone_no (unique), email (unique), password, address, headquarters, bank fields, upi_id, date_of_birth, gender, profile_photo (base64), designation, is_verified, created_at, updated_at, last_login
 - `admin_users` (`AdminUser`): id (string, primary key), password
-- `attendance` (`Attendance`): attendance_id, id (FK→mr_users.id), name, check_in_time, check_out_time, date, selfie_proof, present
+- `attendance` (`Attendance`): attendance_id, id (FK→mr_users.id), name, check_in_time, check_out_time, date, check_in_selfie, present
 - `doctors` (`Doctor`): doctor_id, mr_user_id (FK→mr_users.id), doctor_name, phone_no, email, address, qualification, specialization, experience
 - `chambers` (`Chamber`): chamber_id, doctor_id (FK→doctors.doctor_id), chamber_name, chamber_address, chamber_phone_no
 - `appointments` (`Appointment`): appointment_id, mr_user_id, doctor_id, chamber_id, date, time, status, notes

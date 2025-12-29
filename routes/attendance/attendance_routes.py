@@ -18,7 +18,8 @@ class AttendanceCreate(BaseModel):
     check_in_time: Optional[datetime] = None
     check_out_time: Optional[datetime] = None
     date: date
-    selfie_proof: Optional[str] = None  # Base64 encoded image
+    check_in_selfie: Optional[str] = None # Base64 encoded image
+    check_out_selfie: Optional[str] = None  # Base64 encoded image
     present: bool = False
 
 
@@ -29,7 +30,8 @@ class AttendanceResponse(BaseModel):
     check_in_time: Optional[datetime] = None
     check_out_time: Optional[datetime] = None
     date: date
-    selfie_proof: Optional[str] = None  # Base64 encoded image
+    check_in_selfie: Optional[str] = None  # Base64 encoded image
+    check_out_selfie: Optional[str] = None  # Base64 encoded image
     present: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -48,7 +50,8 @@ class UpdateCheckOutTime(BaseModel):
 
 
 class UpdateSelfieProof(BaseModel):
-    selfie_proof: str  # Base64 encoded image
+    check_in_selfie: str  # Base64 encoded image
+    check_out_selfie: str  # Base64 encoded image
 
 
 class UpdatePresent(BaseModel):
@@ -60,7 +63,8 @@ class UpdateAttendance(BaseModel):
     check_in_time: Optional[datetime] = None
     check_out_time: Optional[datetime] = None
     date: Optional[date] = None
-    selfie_proof: Optional[str] = None
+    check_in_selfie: Optional[str] = None
+    check_out_selfie: Optional[str] = None
     present: Optional[bool] = None
 
 
@@ -96,7 +100,8 @@ def create_attendance(attendance_data: AttendanceCreate, db: Session = Depends(g
         check_in_time=attendance_data.check_in_time,
         check_out_time=attendance_data.check_out_time,
         date=attendance_data.date,
-        selfie_proof=attendance_data.selfie_proof,
+        check_in_selfie=attendance_data.check_in_selfie,
+        check_out_selfie=attendance_data.check_out_selfie,
         present=attendance_data.present
     )
     
@@ -191,14 +196,15 @@ def update_check_out_time(attendance_id: int, data: UpdateCheckOutTime, db: Sess
     return attendance
 
 
-# PUT: Update selfie proof (Base64) for an attendance record
+# PUT: Update check_in_selfie and check_out_selfie (Base64) for an attendance record
 @router.put("/{attendance_id}/selfie-proof", response_model=AttendanceResponse)
-def update_selfie_proof(attendance_id: int, data: UpdateSelfieProof, db: Session = Depends(get_db)):
+def update_check_in_selfie(attendance_id: int, data: UpdateSelfieProof, db: Session = Depends(get_db)):
     """Update selfie proof (Base64 encoded image)"""
     attendance = db.query(Attendance).filter(Attendance.attendance_id == attendance_id).first()
     if not attendance:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attendance record not found")
-    attendance.selfie_proof = data.selfie_proof
+    attendance.check_in_selfie = data.check_in_selfie
+    attendance.check_out_selfie = data.check_out_selfie
     db.commit()
     db.refresh(attendance)
     return attendance
