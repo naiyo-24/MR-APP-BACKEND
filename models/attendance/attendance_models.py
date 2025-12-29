@@ -13,7 +13,8 @@ class Attendance(Base):
     check_in_time = Column(DateTime(timezone=True), nullable=True)
     check_out_time = Column(DateTime(timezone=True), nullable=True)
     date = Column(Date, nullable=False, index=True)
-    selfie_proof = Column(Text, nullable=True)  # Base64 encoded image
+    check_in_selfie = Column(Text, nullable=True) # Base64 encoded image for check-in
+    check_out_selfie = Column(Text, nullable=True)  # Base64 encoded image for check-out
     present = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

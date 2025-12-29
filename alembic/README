@@ -1,0 +1,10 @@
+This directory contains Alembic migration environment and scripts.
+
+- env.py: Alembic environment configuration, set up to use db.py, main.py, and .env
+- script.py.mako: Template for new migration scripts
+
+To generate a migration, use:
+  alembic revision --autogenerate -m "message"
+
+To apply migrations, use:
+  alembic upgrade head
