@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/doctor", tags=["Doctor"])
 
 # Pydantic Schemas
 class ChamberSchema(BaseModel):
-    chamber_id: Optional[int]
+    chamber_id: Optional[int] = None
     chamber_name: str
     chamber_address: Optional[str] = None
     chamber_phone_no: Optional[str] = None
@@ -58,6 +58,9 @@ class DoctorUpdate(BaseModel):
     specialization: Optional[str] = None
     experience: Optional[str] = None
     chambers: Optional[List[ChamberSchema]] = None
+
+class ChambersUpdate(BaseModel):
+    chambers: List[ChamberSchema]
 
 # ==================== POST ROUTES ====================
 @router.post("/mr-user/{mr_user_id}", response_model=DoctorResponse, status_code=status.HTTP_201_CREATED)
@@ -154,3 +157,64 @@ def update_doctor(doctor_id: int, doctor_data: DoctorUpdate, db: Session = Depen
         db.commit()
     chambers = db.query(Chamber).filter(Chamber.doctor_id == doctor_id).all()
     return DoctorResponse(**doctor.__dict__, chambers=chambers)
+
+# ==================== UPDATE/ADD CHAMBERS BY DOCTOR ID ====================
+@router.put("/{doctor_id}/chambers", response_model=DoctorResponse)
+def update_chambers_by_doctor_id(doctor_id: int, payload: ChambersUpdate, db: Session = Depends(get_db)):
+    """Update or add chambers for a specific doctor by doctor ID"""
+    doctor = db.query(Doctor).filter(Doctor.doctor_id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Doctor not found")
+    
+    # Delete existing chambers
+    db.query(Chamber).filter(Chamber.doctor_id == doctor_id).delete()
+    db.commit()
+    
+    # Add new chambers
+    for chamber in payload.chambers:
+        new_chamber = Chamber(
+            doctor_id=doctor_id,
+            chamber_name=chamber.chamber_name,
+            chamber_address=chamber.chamber_address,
+            chamber_phone_no=chamber.chamber_phone_no
+        )
+        db.add(new_chamber)
+    db.commit()
+    
+    chambers = db.query(Chamber).filter(Chamber.doctor_id == doctor_id).all()
+    user = db.query(MRUser).filter(MRUser.id == doctor.mr_user_id).first()
+    full_name = user.full_name if user else None
+    return DoctorResponse(**doctor.__dict__, chambers=chambers, mr_user_full_name=full_name)
+
+# ==================== UPDATE/ADD CHAMBERS BY MR USER ID ====================
+@router.put("/mr-user/{mr_user_id}/chambers", response_model=List[DoctorResponse])
+def update_chambers_by_mr_user_id(mr_user_id: int, payload: ChambersUpdate, db: Session = Depends(get_db)):
+    """Update or add chambers for all doctors of an MR user"""
+    doctors = db.query(Doctor).filter(Doctor.mr_user_id == mr_user_id).all()
+    if not doctors:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No doctors found for this MR user")
+    
+    user = db.query(MRUser).filter(MRUser.id == mr_user_id).first()
+    full_name = user.full_name if user else None
+    
+    responses = []
+    for doctor in doctors:
+        # Delete existing chambers for this doctor
+        db.query(Chamber).filter(Chamber.doctor_id == doctor.doctor_id).delete()
+        db.commit()
+        
+        # Add new chambers for this doctor
+        for chamber in payload.chambers:
+            new_chamber = Chamber(
+                doctor_id=doctor.doctor_id,
+                chamber_name=chamber.chamber_name,
+                chamber_address=chamber.chamber_address,
+                chamber_phone_no=chamber.chamber_phone_no
+            )
+            db.add(new_chamber)
+        db.commit()
+        
+        chambers = db.query(Chamber).filter(Chamber.doctor_id == doctor.doctor_id).all()
+        responses.append(DoctorResponse(**doctor.__dict__, chambers=chambers, mr_user_full_name=full_name))
+    
+    return responses
