@@ -5,8 +5,8 @@ from pathlib import Path
 
 router = APIRouter(prefix="/api/force-update", tags=["Force Update"])
 
-latest_apk_version = "1.0.15"
-latest_apk_file = "mr_app_115.apk"
+latest_apk_version = "1.0.16"
+latest_apk_file = "mr_app_116.apk"
 
 
 # GET /api/force-update - Return the latest APK file info (URL, version, filename)
