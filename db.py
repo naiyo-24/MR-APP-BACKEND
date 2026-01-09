@@ -41,4 +41,5 @@ def create_tables():
     from models.visual_ads.visual_ads_models import VisualAd
     from models.ads.ads_models import Ad
     from models.salary_slip.slip_models import SalarySlip
+    from models.work_area.work_area_models import WorkArea
     Base.metadata.create_all(bind=engine)
