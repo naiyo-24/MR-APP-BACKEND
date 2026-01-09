@@ -43,6 +43,10 @@ class WorkAreaUpdate(BaseModel):
 	status: Optional[WorkAreaStatus] = None
 
 
+class StatusUpdate(BaseModel):
+	status: WorkAreaStatus
+
+
 # ==================== POST ====================
 @router.post("/create", response_model=WorkAreaResponse, status_code=status.HTTP_201_CREATED)
 def create_work_area(payload: WorkAreaCreate, db: Session = Depends(get_db)):
@@ -123,6 +127,25 @@ def update_work_area(work_area_id: int, payload: WorkAreaUpdate, db: Session = D
 	user = db.query(MRUser).filter(MRUser.id == item.mr_user_id).first()
 	full_name = user.full_name if user else None
 	return WorkAreaResponse(**item.__dict__, mr_user_full_name=full_name)
+
+
+# ==================== PUT UPDATE STATUS BY MR USER ID ====================
+@router.put("/update-status/mr-user/{mr_user_id}", response_model=List[WorkAreaResponse])
+def update_work_area_status_by_mr_user(mr_user_id: int, payload: StatusUpdate, db: Session = Depends(get_db)):
+	items = db.query(WorkArea).filter(WorkArea.mr_user_id == mr_user_id).all()
+	if not items:
+		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No work areas found for this MR user")
+	
+	user = db.query(MRUser).filter(MRUser.id == mr_user_id).first()
+	full_name = user.full_name if user else None
+	
+	# Update status for all work areas of this MR user
+	for item in items:
+		item.status = payload.status
+		db.commit()
+		db.refresh(item)
+	
+	return [WorkAreaResponse(**item.__dict__, mr_user_full_name=full_name) for item in items]
 
 
 # ==================== DELETE BY ID ====================
